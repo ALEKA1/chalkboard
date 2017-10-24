@@ -822,8 +822,28 @@ public class Background extends Service {
 
                 notificationCompatBuilderClass.setContentTitle("Next: " + nextClass.getName());
 
-                if (minutesLeft >= 60)
-                    notificationCompatBuilderClass.setContentText("In 60 minutes" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+                if (minutesLeft > 60) {
+
+                    if (minutesLeft < 120) {
+
+                        if (minutesLeft == 61)
+                            notificationCompatBuilderClass.setContentText("In 1 hour, 1 minute" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+                        else
+                            notificationCompatBuilderClass.setContentText("In 1 hour, " + (minutesLeft % 60) + " minutes" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+
+                    } else {
+
+                        if ((minutesLeft % 60) == 0)
+                            notificationCompatBuilderClass.setContentText("In " + (minutesLeft / 60) + " hours" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+                        else if ((minutesLeft % 60) == 1)
+                            notificationCompatBuilderClass.setContentText("In " + ((minutesLeft - (minutesLeft % 60)) / 60) + " hours, 1 minute" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+                        else
+                            notificationCompatBuilderClass.setContentText("In " + ((minutesLeft - (minutesLeft % 60)) / 60) + " hours, " + (minutesLeft % 60) + " minutes" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
+
+                    }
+
+                } else if (minutesLeft == 60)
+                    notificationCompatBuilderClass.setContentText("In 1 hour" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
                 else if (minutesLeft <= 0)
                     notificationCompatBuilderClass.setContentText("In 0 minutes" + (nextClass.hasLocation() ? " at " + nextClass.getLocation() : ""));
                 else if (minutesLeft == 1)
