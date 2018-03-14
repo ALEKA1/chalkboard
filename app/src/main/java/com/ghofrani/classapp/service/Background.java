@@ -266,7 +266,7 @@ public class Background extends Service {
 
         notificationManager.createNotificationChannel(notificationChannelClass);
 
-        notificationChannelReminder = new NotificationChannel("reminder", "Reminders", NotificationManager.IMPORTANCE_MAX);
+        notificationChannelReminder = new NotificationChannel("reminder", "Reminders", NotificationManager.IMPORTANCE_HIGH);
         notificationChannelReminder.setDescription("Notifications about events.");
         notificationChannelReminder.enableLights(true);
         notificationChannelReminder.setLightColor(sharedPreferences.getInt("primary_color", ContextCompat.getColor(this, R.color.teal)));
