@@ -1,14 +1,20 @@
 apply plugin: 'com.android.application'
 
 android {
+
     signingConfigs {
+
         release {
+
             keyAlias 'release'
             keyPassword KEY_PASSWORD
             storeFile file('release.jks')
             storePassword STORE_PASSWORD
+
         }
+
     }
+
     compileSdkVersion 27
     buildToolsVersion "27.0.3"
     defaultConfig {
@@ -20,18 +26,27 @@ android {
         versionName '0.0.8'
 
     }
+
     buildTypes {
+
         release {
+
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
+
         }
+
         debug {
+
             minifyEnabled false
+
         }
+
     }
-    productFlavors {
-    }
+
+    productFlavors {}
+
 }
 
 repositories {
@@ -41,19 +56,21 @@ repositories {
 }
 
 dependencies {
+
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:27.1.0'
-    compile 'com.android.support:cardview-v7:27.1.0'
-    compile 'com.android.support:recyclerview-v7:27.1.0'
-    compile 'com.android.support:support-v13:27.1.0'
-    compile 'com.android.support:design:27.1.0'
-    compile 'com.android.support:support-v4:27.1.0'
-    compile 'net.danlew:android.joda:2.9.9.2'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:cardview-v7:27.1.1'
+    compile 'com.android.support:recyclerview-v7:27.1.1'
+    compile 'com.android.support:support-v13:27.1.1'
+    compile 'com.android.support:design:27.1.1'
+    compile 'com.android.support:support-v4:27.1.1'
+    compile 'net.danlew:android.joda:2.9.9.3'
     compile 'org.xdty.preference:color-picker:0.0.5'
     compile 'com.borax12.materialdaterangepicker:library:1.9'
     compile 'com.afollestad.material-dialogs:core:0.9.6.0'
     compile 'com.afollestad.material-dialogs:commons:0.9.6.0'
     compile 'org.greenrobot:eventbus:3.1.1'
     compile 'de.psdev.licensesdialog:licensesdialog:1.8.3'
+
 }
