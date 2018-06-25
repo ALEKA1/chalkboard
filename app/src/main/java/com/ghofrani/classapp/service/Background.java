@@ -363,7 +363,7 @@ public class Background extends Service {
         if (currentClass != null) {
 
             if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT)
-                if (sharedPreferences.getBoolean("vibrate_only_during_classes", true))
+                if (sharedPreferences.getBoolean("vibrate_only_during_classes", false))
                     audioManager.setRingerMode(AudioManager.RINGER_MODE_VIBRATE);
 
             final StandardClass finalCurrentClass = currentClass;
@@ -788,7 +788,7 @@ public class Background extends Service {
         } else if (nextClass != null && sharedPreferences.getBoolean("next_class_notification", true)) {
 
             if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT)
-                if (sharedPreferences.getBoolean("vibrate_only_during_classes", true))
+                if (sharedPreferences.getBoolean("vibrate_only_during_classes", false))
                     audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
             nextToCurrentTransition = true;
@@ -863,7 +863,7 @@ public class Background extends Service {
         } else {
 
             if (audioManager.getRingerMode() != AudioManager.RINGER_MODE_SILENT)
-                if (sharedPreferences.getBoolean("vibrate_only_during_classes", true))
+                if (sharedPreferences.getBoolean("vibrate_only_during_classes", false))
                     audioManager.setRingerMode(AudioManager.RINGER_MODE_NORMAL);
 
             currentToNextTransition = false;
