@@ -63,6 +63,7 @@ public class Background extends Service {
     private final int NOTIFICATION_CURRENT_CLASS_ID = 0;
     private final int NOTIFICATION_NEXT_CLASS_ID = 1;
     private final int NOTIFICATION_REMINDERS_ID = 2;
+    private final int NOTIFICATION_SERVICE_ID = 99;
     private final int ID_EVENTS = 6;
 
     private int progressBarId;
@@ -72,9 +73,11 @@ public class Background extends Service {
     private Handler handler;
     private Runnable notificationRunnable;
     private Runnable noNotificationRunnable;
+    private NotificationCompat.Builder notificationCompatBuilderService;
     private NotificationCompat.Builder notificationCompatBuilderClass;
     private NotificationCompat.Builder notificationCompatBuilderReminder;
     private NotificationManager notificationManager;
+    private NotificationChannel notificationChannelService;
     private NotificationChannel notificationChannelClass;
     private NotificationChannel notificationChannelReminder;
     private RemoteViews remoteViews;
@@ -110,6 +113,8 @@ public class Background extends Service {
     private boolean simpleToDetailedTransition = false;
     private boolean detailedToSimpleTransition = false;
 
+    private LocalTime lastEventNotifyDateTime;
+
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         if (intent != null) {
@@ -123,6 +128,23 @@ public class Background extends Service {
                 getEvents(false);
 
             }
+
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            final Intent homeActivityIntent = new Intent(this, Main.class);
+            final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_SERVICE_ID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+            notificationCompatBuilderService = new NotificationCompat.Builder(this, "service")
+                    .setSmallIcon(R.drawable.ic_notification_icon)
+                    .setWhen(0)
+                    .setContentIntent(addHomeActivityIntent)
+                    .setContentTitle("Chalkboard is running...")
+                    .setContentText("Long press on this notification to hide it.")
+                    .setPriority(NotificationCompat.PRIORITY_MIN);
+
+            startForeground(NOTIFICATION_SERVICE_ID, notificationCompatBuilderService.build());
 
         }
 
@@ -151,7 +173,7 @@ public class Background extends Service {
         remoteViews = new RemoteViews(getPackageName(), R.layout.view_notification);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-            createNotificationChannel();
+            createNotificationChannels();
 
         progressBarId = R.id.view_notification_progress_bar_red;
         textId = R.id.view_notification_subtitle_text_view;
@@ -205,7 +227,7 @@ public class Background extends Service {
             getData();
 
         if (updateEvent.isEvents())
-            getEvents(false);
+            getEvents(updateEvent.isNotifyEvents());
 
         if (updateEvent.isTimetable())
             getTimetable();
@@ -240,21 +262,36 @@ public class Background extends Service {
         backgroundBroadcastReceiver = null;
         notificationRunnable = null;
         noNotificationRunnable = null;
+        notificationCompatBuilderService = null;
         notificationCompatBuilderClass = null;
         notificationCompatBuilderReminder = null;
         notificationManager = null;
+        notificationChannelService = null;
         notificationChannelClass = null;
         notificationChannelReminder = null;
         remoteViews = null;
         dateTimeFormatterAMPM = null;
         audioManager = null;
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            stopForeground(true);
+
         super.onDestroy();
 
     }
 
     @TargetApi(26)
-    private void createNotificationChannel() {
+    private void createNotificationChannels() {
+
+        notificationChannelService = new NotificationChannel("service", "Services", NotificationManager.IMPORTANCE_NONE);
+        notificationChannelService.setDescription("Notifications about services.");
+        notificationChannelService.enableLights(false);
+        notificationChannelService.enableVibration(false);
+        notificationChannelService.setBypassDnd(false);
+        notificationChannelService.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+        notificationChannelService.setShowBadge(false);
+
+        notificationManager.createNotificationChannel(notificationChannelService);
 
         notificationChannelClass = new NotificationChannel("class", "Class Notifications", NotificationManager.IMPORTANCE_LOW);
         notificationChannelClass.setDescription("Notifications about classes.");
@@ -395,10 +432,10 @@ public class Background extends Service {
                     }
 
                     final Intent homeActivityIntent = new Intent(this, Main.class);
-                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, 0, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_CURRENT_CLASS_ID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     final Intent eventActivityIntent = new Intent(this, ChangeEvent.class).putExtra("origin_notification", true);
-                    final PendingIntent addEventActivityEvent = PendingIntent.getActivity(this, 0, eventActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    final PendingIntent addEventActivityEvent = PendingIntent.getActivity(this, NOTIFICATION_CURRENT_CLASS_ID, eventActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     remoteViews.setOnClickPendingIntent(R.id.view_notification_change_event_image_button, addEventActivityEvent);
 
@@ -528,7 +565,7 @@ public class Background extends Service {
                             .setContentIntent(addHomeActivityIntent)
                             .setColor(finalCurrentClass.getColor())
                             .setContent(remoteViews)
-                            .setPriority(NotificationManager.IMPORTANCE_MAX)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setWhen(0);
 
                     notificationRunnable = new Runnable() {
@@ -629,17 +666,17 @@ public class Background extends Service {
                     }
 
                     final Intent homeActivityIntent = new Intent(this, Main.class);
-                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, 0, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_CURRENT_CLASS_ID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     final Intent eventActivityIntent = new Intent(this, ChangeEvent.class).putExtra("origin_notification", true);
-                    final PendingIntent addEventActivityIntent = PendingIntent.getActivity(this, 0, eventActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    final PendingIntent addEventActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_CURRENT_CLASS_ID, eventActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     notificationCompatBuilderClass = new NotificationCompat.Builder(this, "class")
                             .setSmallIcon(R.drawable.ic_notification_icon)
                             .setOngoing(true)
                             .setColor(finalCurrentClass.getColor())
                             .setContentIntent(addHomeActivityIntent)
-                            .setPriority(NotificationManager.IMPORTANCE_MAX)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
                             .addAction(event, "ADD EVENT", addEventActivityIntent)
                             .setContentTitle(finalCurrentClass.getName())
                             .setWhen(0);
@@ -809,7 +846,7 @@ public class Background extends Service {
             if (minutesLeft <= Integer.parseInt(sharedPreferences.getString("next_class_notification_minutes", "30"))) {
 
                 final Intent homeActivityIntent = new Intent(this, Main.class);
-                final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, 0, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_NEXT_CLASS_ID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                 notificationCompatBuilderClass = new NotificationCompat.Builder(this, "class")
                         .setOngoing(true)
@@ -817,8 +854,7 @@ public class Background extends Service {
                         .setContentIntent(addHomeActivityIntent)
                         .setWhen(0)
                         .setColor(nextClass.getColor())
-                        .setVisibility(Notification.VISIBILITY_PUBLIC)
-                        .setPriority(NotificationManager.IMPORTANCE_MAX);
+                        .setPriority(NotificationCompat.PRIORITY_MAX);
 
                 notificationCompatBuilderClass.setContentTitle("Next: " + nextClass.getName());
 
@@ -924,6 +960,15 @@ public class Background extends Service {
     }
 
     private void getEvents(boolean notify) {
+
+        if (notify) {
+
+            if (lastEventNotifyDateTime.equals(new LocalTime().withHourOfDay(LocalTime.now().getHourOfDay()).withMinuteOfHour(LocalTime.now().getMinuteOfHour()).withSecondOfMinute(0).withMillisOfSecond(0)))
+                return;
+
+            lastEventNotifyDateTime = new LocalTime().withHourOfDay(LocalTime.now().getHourOfDay()).withMinuteOfHour(LocalTime.now().getMinuteOfHour()).withSecondOfMinute(0).withMillisOfSecond(0);
+
+        }
 
         Cursor eventsCursor = databaseHelper.getEventsCursor();
 
@@ -1279,7 +1324,7 @@ public class Background extends Service {
                             .setAutoCancel(true)
                             .setDefaults(Notification.DEFAULT_ALL)
                             .setContentIntent(homeActivityPendingIntent)
-                            .setPriority(NotificationManager.IMPORTANCE_MAX)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
                             .addAction(R.drawable.event, "DONE", donePendingIntent)
                             .setContentTitle(event.getClassName() + " • " + event.getName());
 
@@ -1559,7 +1604,7 @@ public class Background extends Service {
                             .setDefaults(Notification.DEFAULT_ALL)
                             .setContentTitle("Chalkboard Reminders")
                             .setContentIntent(addHomeActivityIntent)
-                            .setPriority(NotificationManager.IMPORTANCE_MAX)
+                            .setPriority(NotificationCompat.PRIORITY_MAX)
                             .setContentText("You have " + reminderEvents.size() + " reminders")
                             .setGroup(reminderGroup)
                             .setGroupSummary(true);

@@ -257,7 +257,7 @@ public class Main extends AppCompatActivity implements DrawerLayout.DrawerListen
             sharedPreferences.edit().putBoolean("class_notification", true).commit();
             sharedPreferences.edit().putBoolean("next_class_notification", true).commit();
 
-            EventBus.getDefault().post(new Update(true, false, false, false));
+            EventBus.getDefault().post(new Update(true, false, false, false, false));
 
             invalidateOptionsMenu();
 
@@ -270,7 +270,7 @@ public class Main extends AppCompatActivity implements DrawerLayout.DrawerListen
             sharedPreferences.edit().putBoolean("class_notification", false).commit();
             sharedPreferences.edit().putBoolean("next_class_notification", false).commit();
 
-            EventBus.getDefault().post(new Update(true, false, false, false));
+            EventBus.getDefault().post(new Update(true, false, false, false, false));
 
             invalidateOptionsMenu();
 

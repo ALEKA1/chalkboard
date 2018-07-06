@@ -204,7 +204,7 @@ public class ChangeClass extends AppCompatActivity {
 
                     }
 
-                    EventBus.getDefault().post(new Update(true, true, true, true));
+                    EventBus.getDefault().post(new Update(true, true, true, true, false));
 
                     final View currentFocus = this.getCurrentFocus();
 
@@ -240,7 +240,7 @@ public class ChangeClass extends AppCompatActivity {
 
                             }
 
-                            EventBus.getDefault().post(new Update(false, false, false, true));
+                            EventBus.getDefault().post(new Update(false, false, false, true, false));
 
                             final View currentFocus = this.getCurrentFocus();
 
@@ -282,7 +282,7 @@ public class ChangeClass extends AppCompatActivity {
 
                         }
 
-                        EventBus.getDefault().post(new Update(false, false, false, true));
+                        EventBus.getDefault().post(new Update(false, false, false, true, false));
 
                         final View currentFocus = this.getCurrentFocus();
 

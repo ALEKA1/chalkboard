@@ -1395,7 +1395,7 @@ public class EditDay extends AppCompatActivity {
     @Override
     protected void onStop() {
 
-        EventBus.getDefault().post(new Update(true, false, false, false));
+        EventBus.getDefault().post(new Update(true, false, false, false, false));
 
         super.onStop();
 

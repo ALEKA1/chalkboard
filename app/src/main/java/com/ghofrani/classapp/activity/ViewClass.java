@@ -202,7 +202,7 @@ public class ViewClass extends AppCompatActivity {
 
                     }
 
-                    EventBus.getDefault().post(new Update(true, true, true, true));
+                    EventBus.getDefault().post(new Update(true, true, true, true, false));
 
                     ViewClass.super.onBackPressed();
 

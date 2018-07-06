@@ -107,7 +107,7 @@ public class Settings extends AppCompatActivity {
                     || key.equals("next_class_notification_minutes")
                     || key.equals("tomorrow_classes")) {
 
-                EventBus.getDefault().post(new Update(true, false, false, false));
+                EventBus.getDefault().post(new Update(true, false, false, false, false));
 
             } else if (key.equals("primary_color")
                     || key.equals("accent_color")) {
@@ -122,7 +122,7 @@ public class Settings extends AppCompatActivity {
 
             } else if (key.equals("first_day_of_week")) {
 
-                EventBus.getDefault().post(new Update(false, true, false, false));
+                EventBus.getDefault().post(new Update(false, true, false, false, false));
 
                 DataSingleton.getInstance().setChangedFirstDay(true);
 

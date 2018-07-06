@@ -800,7 +800,7 @@ public class ChangeEvent extends AppCompatActivity {
 
                 }
 
-                EventBus.getDefault().post(new Update(false, true, false, false));
+                EventBus.getDefault().post(new Update(false, true, false, false, false));
 
                 final View currentFocus = this.getCurrentFocus();
 
@@ -862,7 +862,7 @@ public class ChangeEvent extends AppCompatActivity {
 
                     }
 
-                    EventBus.getDefault().post(new Update(false, true, false, false));
+                    EventBus.getDefault().post(new Update(false, true, false, false, false));
 
                     ChangeEvent.super.onBackPressed();
 

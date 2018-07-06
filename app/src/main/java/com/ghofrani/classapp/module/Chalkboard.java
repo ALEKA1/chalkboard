@@ -2,6 +2,7 @@ package com.ghofrani.classapp.module;
 
 import android.app.Application;
 import android.content.Intent;
+import android.os.Build;
 
 import com.ghofrani.classapp.service.Background;
 
@@ -17,7 +18,11 @@ public class Chalkboard extends Application {
         JodaTimeAndroid.init(this);
 
         DataSingleton.initInstance();
-        startService(new Intent(this, Background.class));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForegroundService(new Intent(this, Background.class));
+        else
+            startService(new Intent(this, Background.class));
 
     }
 
