@@ -64,9 +64,10 @@ public class Background extends Service {
 
     private final int NOTIFICATION_CURRENT_CLASS_ID = 0;
     private final int NOTIFICATION_NEXT_CLASS_ID = 1;
-    private final int NOTIFICATION_REMINDERS_ID = 2;
-    private final int NOTIFICATION_SERVICE_ID = 99;
+    private final int NOTIFICATION_SERVICE_ID = 999;
     private final int ID_EVENTS = 6;
+
+    private int reminderNotificationID = 1;
 
     private int progressBarId;
     private int progressTextId;
@@ -329,7 +330,7 @@ public class Background extends Service {
         notificationChannelReminder.enableVibration(true);
         notificationChannelReminder.setBypassDnd(true);
         notificationChannelReminder.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-        notificationChannelReminder.setShowBadge(true);
+        notificationChannelReminder.setShowBadge(false);
 
         notificationManager.createNotificationChannel(notificationChannelReminder);
 
@@ -1317,6 +1318,11 @@ public class Background extends Service {
 
             if (!reminderEvents.isEmpty()) {
 
+                if (reminderNotificationID == 998)
+                    reminderNotificationID = 2;
+                else
+                    reminderNotificationID++;
+
                 final DateTimeFormatter dateTimeFormatterDayOfWeekString = DateTimeFormat.forPattern("EEEE");
                 final DateTimeFormatter dateTimeFormatterTime24Hour = DateTimeFormat.forPattern("HH:mm");
 
@@ -1327,15 +1333,15 @@ public class Background extends Service {
                     final Event event = reminderEvents.get(0);
 
                     final Intent homeActivityIntent = new Intent(this, Main.class).putExtra("fragment", ID_EVENTS);
-                    final PendingIntent homeActivityPendingIntent = PendingIntent.getActivity(this, NOTIFICATION_REMINDERS_ID, homeActivityIntent, PendingIntent.FLAG_ONE_SHOT);
+                    final PendingIntent homeActivityPendingIntent = PendingIntent.getActivity(this, reminderNotificationID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     final Intent doneIntent = new Intent(this, Background.class);
 
                     doneIntent.putExtra("name", event.getName());
                     doneIntent.putExtra("date_time", event.getDateTime().toString());
-                    doneIntent.putExtra("notification_id", String.valueOf(NOTIFICATION_REMINDERS_ID));
+                    doneIntent.putExtra("notification_id", String.valueOf(reminderNotificationID));
 
-                    final PendingIntent donePendingIntent = PendingIntent.getService(this, NOTIFICATION_REMINDERS_ID, doneIntent, PendingIntent.FLAG_ONE_SHOT);
+                    final PendingIntent donePendingIntent = PendingIntent.getService(this, reminderNotificationID, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     notificationCompatBuilderReminder = new NotificationCompat.Builder(this, "reminder")
                             .setSmallIcon(R.drawable.ic_notification_icon)
@@ -1463,31 +1469,31 @@ public class Background extends Service {
 
                     notificationCompatBuilderReminder.setContentText(contentString);
 
-                    notificationManager.notify(NOTIFICATION_REMINDERS_ID, notificationCompatBuilderReminder.build());
+                    notificationManager.notify(reminderNotificationID, notificationCompatBuilderReminder.build());
 
                 } else if (reminderEvents.size() > 1) {
 
-                    String reminderGroup = "reminder_group";
-                    int ID = NOTIFICATION_REMINDERS_ID + 1;
+                    String reminderGroup = "reminder_group_" + String.valueOf(reminderNotificationID + reminderEvents.size());
 
                     for (final Event event : reminderEvents) {
 
                         final Intent homeActivityIntent = new Intent(this, Main.class).putExtra("fragment", ID_EVENTS);
-                        final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, ID, homeActivityIntent, PendingIntent.FLAG_ONE_SHOT);
+                        final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, reminderNotificationID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                         final Intent doneIntent = new Intent(this, Background.class);
 
                         doneIntent.putExtra("name", event.getName());
                         doneIntent.putExtra("date_time", event.getDateTime().toString());
-                        doneIntent.putExtra("notification_id", String.valueOf(ID));
+                        doneIntent.putExtra("notification_id", String.valueOf(reminderNotificationID));
 
-                        final PendingIntent donePendingIntent = PendingIntent.getService(this, ID, doneIntent, PendingIntent.FLAG_ONE_SHOT);
+                        final PendingIntent donePendingIntent = PendingIntent.getService(this, reminderNotificationID, doneIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                         notificationCompatBuilderReminder = new NotificationCompat.Builder(this, "reminder")
                                 .setSmallIcon(R.drawable.ic_notification_icon)
                                 .setAutoCancel(true)
                                 .setContentIntent(addHomeActivityIntent)
                                 .setGroup(reminderGroup)
+                                .setDefaults(Notification.DEFAULT_ALL)
                                 .addAction(R.drawable.event, "DONE", donePendingIntent)
                                 .setContentTitle(event.getClassName() + " • " + event.getName());
 
@@ -1607,14 +1613,14 @@ public class Background extends Service {
 
                         notificationCompatBuilderReminder.setContentText(contentString);
 
-                        notificationManager.notify(ID, notificationCompatBuilderReminder.build());
+                        notificationManager.notify(reminderNotificationID, notificationCompatBuilderReminder.build());
 
-                        ID++;
+                        reminderNotificationID++;
 
                     }
 
                     final Intent homeActivityIntent = new Intent(this, Main.class).putExtra("fragment", ID_EVENTS);
-                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, NOTIFICATION_REMINDERS_ID, homeActivityIntent, PendingIntent.FLAG_ONE_SHOT);
+                    final PendingIntent addHomeActivityIntent = PendingIntent.getActivity(this, reminderNotificationID, homeActivityIntent, PendingIntent.FLAG_CANCEL_CURRENT);
 
                     notificationCompatBuilderReminder = new NotificationCompat.Builder(this, "reminder")
                             .setSmallIcon(R.drawable.ic_notification_icon)
@@ -1628,7 +1634,7 @@ public class Background extends Service {
                             .setGroup(reminderGroup)
                             .setGroupSummary(true);
 
-                    notificationManager.notify(NOTIFICATION_REMINDERS_ID, notificationCompatBuilderReminder.build());
+                    notificationManager.notify(reminderNotificationID, notificationCompatBuilderReminder.build());
 
                 }
 

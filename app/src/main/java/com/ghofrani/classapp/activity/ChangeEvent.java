@@ -539,7 +539,8 @@ public class ChangeEvent extends AppCompatActivity {
 
                         }
 
-                        break;
+                        if (returnDateTime != null)
+                            break;
 
                     }
 
