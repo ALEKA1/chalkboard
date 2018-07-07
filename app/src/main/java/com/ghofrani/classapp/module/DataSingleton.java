@@ -1,7 +1,5 @@
 package com.ghofrani.classapp.module;
 
-import android.util.SparseArray;
-
 import com.ghofrani.classapp.model.Event;
 import com.ghofrani.classapp.model.SlimClass;
 import com.ghofrani.classapp.model.StandardClass;
@@ -45,7 +43,6 @@ public class DataSingleton {
     private ArrayList<Event> pastEventArrayList;
 
     private ArrayList<Object> eventDataArrayList;
-    private SparseArray<Object> dataSparseArrayLastRemoved;
 
     private DateTime thisWeekEnd;
     private DateTime nextWeekEnd;

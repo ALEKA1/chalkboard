@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -119,8 +118,6 @@ public class EventRecycler extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public long getItemId(int position) {
-
-        Log.d("getItemId", "CALLED!");
 
         if (eventDataArrayList.get(position) instanceof StringWithID)
             return ((StringWithID) eventDataArrayList.get(position)).getID();

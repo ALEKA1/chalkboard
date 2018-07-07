@@ -267,11 +267,4 @@ public class ViewClass extends AppCompatActivity {
 
     }
 
-    private int getPixelFromDP(float dPtoConvert) {
-
-        final float scale = getResources().getDisplayMetrics().density;
-        return (int) (dPtoConvert * scale + 0.5f);
-
-    }
-
 }

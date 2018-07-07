@@ -1,6 +1,7 @@
 package com.ghofrani.classapp.service;
 
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -35,6 +36,7 @@ import com.ghofrani.classapp.model.EventWithID;
 import com.ghofrani.classapp.model.SlimClass;
 import com.ghofrani.classapp.model.StandardClass;
 import com.ghofrani.classapp.model.StringWithID;
+import com.ghofrani.classapp.module.AlarmReceiver;
 import com.ghofrani.classapp.module.DataSingleton;
 import com.ghofrani.classapp.module.DatabaseHelper;
 import com.ghofrani.classapp.module.Utils;
@@ -113,23 +115,13 @@ public class Background extends Service {
     private boolean simpleToDetailedTransition = false;
     private boolean detailedToSimpleTransition = false;
 
-    private LocalTime lastEventNotifyDateTime;
+    private DateTime lastEventNotifyDateTime;
+    private ArrayList<String> reminderSwitches;
+
+    private AlarmManager alarmManager;
+    private PendingIntent alarmManagerPendingIntent;
 
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-        if (intent != null) {
-
-            if (intent.hasExtra("name")) {
-
-                databaseHelper.deleteEventByProperties(intent.getStringExtra("name"), intent.getStringExtra("date_time"));
-
-                notificationManager.cancel(Integer.parseInt(intent.getStringExtra("notification_id")));
-
-                getEvents(false);
-
-            }
-
-        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
@@ -145,6 +137,20 @@ public class Background extends Service {
                     .setPriority(NotificationCompat.PRIORITY_MIN);
 
             startForeground(NOTIFICATION_SERVICE_ID, notificationCompatBuilderService.build());
+
+        }
+
+        if (intent != null) {
+
+            if (intent.hasExtra("name")) {
+
+                databaseHelper.deleteEventByProperties(intent.getStringExtra("name"), intent.getStringExtra("date_time"));
+
+                notificationManager.cancel(Integer.parseInt(intent.getStringExtra("notification_id")));
+
+                getEvents(false);
+
+            }
 
         }
 
@@ -203,6 +209,13 @@ public class Background extends Service {
         black = ContextCompat.getColor(this, R.color.black);
         blueGrey = ContextCompat.getColor(this, R.color.blue_grey);
 
+        lastEventNotifyDateTime = new DateTime().withTimeAtStartOfDay();
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+        final Intent alarmManagerIntent = new Intent(this, AlarmReceiver.class);
+        alarmManagerPendingIntent = PendingIntent.getBroadcast(this, 1, alarmManagerIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+
         getData();
         getEvents(false);
         getTimetable();
@@ -242,6 +255,8 @@ public class Background extends Service {
 
         EventBus.getDefault().unregister(this);
 
+        alarmManager.cancel(alarmManagerPendingIntent);
+
         unregisterReceiver(backgroundBroadcastReceiver);
 
         notificationManager.cancel(NOTIFICATION_CURRENT_CLASS_ID);
@@ -272,6 +287,10 @@ public class Background extends Service {
         remoteViews = null;
         dateTimeFormatterAMPM = null;
         audioManager = null;
+        lastEventNotifyDateTime = null;
+        reminderSwitches = null;
+        alarmManagerPendingIntent = null;
+        alarmManager = null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             stopForeground(true);
@@ -594,8 +613,8 @@ public class Background extends Service {
                             else
                                 remoteViews.setTextViewText(textId, "No further classes");
 
-                            String progressBarText = "";
-                            int progressBarProgress = 0;
+                            String progressBarText;
+                            int progressBarProgress;
 
                             if (percentageValueInt >= 0 && percentageValueInt <= 100) {
 
@@ -613,7 +632,7 @@ public class Background extends Service {
                                 remoteViews.setTextViewText(progressTextId, "0");
                                 remoteViews.setProgressBar(progressBarId, 100, 0, false);
 
-                            } else if (percentageValueInt > 100) {
+                            } else {
 
                                 progressBarText = "100%";
                                 progressBarProgress = 100;
@@ -709,8 +728,8 @@ public class Background extends Service {
 
                             notificationCompatBuilderClass.setContentText(remainingNotificationText);
 
-                            String progressBarText = "";
-                            int progressBarProgress = 0;
+                            String progressBarText;
+                            int progressBarProgress;
 
                             if (percentageValueInt >= 0 && percentageValueInt <= 100) {
 
@@ -722,7 +741,7 @@ public class Background extends Service {
                                 progressBarText = "0%";
                                 progressBarProgress = 0;
 
-                            } else if (percentageValueInt > 100) {
+                            } else {
 
                                 progressBarText = "100%";
                                 progressBarProgress = 100;
@@ -777,8 +796,8 @@ public class Background extends Service {
                             final int minutesRemaining = finalCurrentClass.getEndTime().toDateTimeToday().getMinuteOfDay() - currentTime.getMinuteOfDay() - 1;
                             String remainingText;
 
-                            String progressBarText = "";
-                            int progressBarProgress = 0;
+                            String progressBarText;
+                            int progressBarProgress;
 
                             if (percentageValueInt >= 0 && percentageValueInt <= 100) {
 
@@ -790,7 +809,7 @@ public class Background extends Service {
                                 progressBarText = "0%";
                                 progressBarProgress = 0;
 
-                            } else if (percentageValueInt > 100) {
+                            } else {
 
                                 progressBarText = "100%";
                                 progressBarProgress = 100;
@@ -963,10 +982,10 @@ public class Background extends Service {
 
         if (notify) {
 
-            if (lastEventNotifyDateTime.equals(new LocalTime().withHourOfDay(LocalTime.now().getHourOfDay()).withMinuteOfHour(LocalTime.now().getMinuteOfHour()).withSecondOfMinute(0).withMillisOfSecond(0)))
-                return;
+            if (lastEventNotifyDateTime.equals(new DateTime().withTime(DateTime.now().getHourOfDay(), DateTime.now().getMinuteOfHour(), 0, 0)))
+                notify = false;
 
-            lastEventNotifyDateTime = new LocalTime().withHourOfDay(LocalTime.now().getHourOfDay()).withMinuteOfHour(LocalTime.now().getMinuteOfHour()).withSecondOfMinute(0).withMillisOfSecond(0);
+            lastEventNotifyDateTime = new DateTime().withTime(DateTime.now().getHourOfDay(), DateTime.now().getMinuteOfHour(), 0, 0);
 
         }
 
@@ -1078,20 +1097,20 @@ public class Background extends Service {
 
         }
 
+        if (reminderSwitches == null)
+            reminderSwitches = new ArrayList<>();
+        else
+            reminderSwitches.clear();
+
         String[] reminderTimes;
-        ArrayList<String> reminderSwitches = new ArrayList<>();
         ArrayList<Event> reminderEvents = new ArrayList<>();
 
         if (notify) {
 
             reminderTimes = sharedPreferences.getStringSet("reminder_times", null) == null ? new String[]{"no-reminders"} : sharedPreferences.getStringSet("reminder_times", null).toArray(new String[]{});
 
-            reminderSwitches = new ArrayList<>();
-
             if (!reminderTimes[0].equals("no-reminders"))
                 Collections.addAll(reminderSwitches, reminderTimes);
-
-            reminderEvents = new ArrayList<>();
 
         }
 
@@ -1617,6 +1636,10 @@ public class Background extends Service {
 
         }
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+            if (!eventDataArrayList.isEmpty())
+                updateAlarm();
+
         EventBus.getDefault().post(new UpdateEventsUI());
 
     }
@@ -1689,6 +1712,61 @@ public class Background extends Service {
 
         DataSingleton.getInstance().setAllClassesArrayList(slimClassArrayList);
         DataSingleton.getInstance().setAllClassNamesArrayList(classNamesArrayList);
+
+    }
+
+    @TargetApi(23)
+    private void updateAlarm() {
+
+        alarmManager.cancel(alarmManagerPendingIntent);
+
+        final ArrayList<Long> alarmTimeArrayList = new ArrayList<>();
+
+        for (final Object object : DataSingleton.getInstance().getEventDataArrayList()) {
+
+            if (object instanceof EventWithID) {
+
+                final Event event = ((EventWithID) object).getEvent();
+
+                if (event.isRemind()) {
+
+                    if (reminderSwitches.contains("0"))
+                        alarmTimeArrayList.add(event.getDateTime().minusHours(1).getMillis());
+
+                    if (reminderSwitches.contains("1"))
+                        alarmTimeArrayList.add(event.getDateTime().withTime(6, 0, 0, 0).getMillis());
+
+                    if (reminderSwitches.contains("2"))
+                        alarmTimeArrayList.add(event.getDateTime().minusDays(1).withTime(21, 0, 0, 0).getMillis());
+
+                    if (reminderSwitches.contains("3"))
+                        alarmTimeArrayList.add(event.getDateTime().minusDays(1).withTime(18, 0, 0, 0).getMillis());
+
+                    if (reminderSwitches.contains("4"))
+                        if (Utils.getClassesArrayListOfDay(event.getDateTime().minusDays(1).getDayOfWeek()) != null)
+                            alarmTimeArrayList.add(event.getDateTime().minusDays(1).withTime(Utils.getClassesArrayListOfDay(event.getDateTime().minusDays(1).getDayOfWeek()).get(Utils.getClassesArrayListOfDay(event.getDateTime().minusDays(1).getDayOfWeek()).size() - 1).getEndTime()).getMillis());
+
+                    if (reminderSwitches.contains("5"))
+                        alarmTimeArrayList.add(event.getDateTime().minusDays(7).withTime(18, 0, 0, 0).getMillis());
+
+                }
+
+            }
+
+        }
+
+        Collections.sort(alarmTimeArrayList);
+
+        for (final long time : alarmTimeArrayList) {
+
+            if (DateTime.now().getMillis() < time) {
+
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, time + 5000, alarmManagerPendingIntent);
+                break;
+
+            }
+
+        }
 
     }
 
