@@ -260,8 +260,7 @@ public class Background extends Service {
 
         unregisterReceiver(backgroundBroadcastReceiver);
 
-        notificationManager.cancel(NOTIFICATION_CURRENT_CLASS_ID);
-        notificationManager.cancel(NOTIFICATION_NEXT_CLASS_ID);
+        notificationManager.cancelAll();
 
         if (handler != null) {
 
@@ -290,8 +289,8 @@ public class Background extends Service {
         audioManager = null;
         lastEventNotifyDateTime = null;
         reminderSwitches = null;
-        alarmManagerPendingIntent = null;
         alarmManager = null;
+        alarmManagerPendingIntent = null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             stopForeground(true);
@@ -1754,6 +1753,8 @@ public class Background extends Service {
 
                     if (reminderSwitches.contains("5"))
                         alarmTimeArrayList.add(event.getDateTime().minusDays(7).withTime(18, 0, 0, 0).getMillis());
+
+                    alarmTimeArrayList.add(event.getDateTime().getMillis());
 
                 }
 

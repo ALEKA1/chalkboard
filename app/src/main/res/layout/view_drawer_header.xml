@@ -28,7 +28,7 @@
         android:layout_above="@id/view_drawer_header_subtitle_text_view"
         android:layout_alignParentLeft="true"
         android:layout_marginLeft="18dp"
-        android:text="Chalkboard"
+        android:text="@string/app_name"
         android:textColor="@color/white"
         android:textSize="26sp" />
 
