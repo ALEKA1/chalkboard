@@ -23,8 +23,8 @@ android {
         applicationId "com.ghofrani.classapp"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 8
-        versionName '0.0.8'
+        versionCode 9
+        versionName '0.0.9'
 
     }
 

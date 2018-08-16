@@ -250,6 +250,9 @@ public class ViewClass extends AppCompatActivity {
 
                 className = resultIntent.getStringExtra("class_name");
 
+                if (toolbar == null)
+                    toolbar = findViewById(R.id.activity_view_class_toolbar);
+
                 toolbar.setTitle(className);
 
             }

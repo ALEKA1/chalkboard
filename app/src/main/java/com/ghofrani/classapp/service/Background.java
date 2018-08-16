@@ -133,7 +133,7 @@ public class Background extends Service {
                     .setSmallIcon(R.drawable.ic_notification_icon)
                     .setWhen(0)
                     .setContentIntent(addHomeActivityIntent)
-                    .setContentTitle("Chalkboard is running...")
+                    .setContentTitle("Chalkboard is running idle...")
                     .setContentText("Long press on this notification to hide it.")
                     .setPriority(NotificationCompat.PRIORITY_MIN);
 
@@ -1107,7 +1107,7 @@ public class Background extends Service {
 
         if (notify) {
 
-            reminderTimes = sharedPreferences.getStringSet("reminder_times", null) == null ? new String[]{"no-reminders"} : sharedPreferences.getStringSet("reminder_times", null).toArray(new String[]{});
+            reminderTimes = sharedPreferences.getStringSet("reminder_times", null) == null ? new String[]{"no-reminders"} : (sharedPreferences.getStringSet("reminder_times", null).isEmpty() ? new String[]{"no-reminders"} : sharedPreferences.getStringSet("reminder_times", null).toArray(new String[]{}));
 
             if (!reminderTimes[0].equals("no-reminders"))
                 Collections.addAll(reminderSwitches, reminderTimes);
