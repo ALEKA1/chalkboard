@@ -3,8 +3,8 @@
 <resources>
 
     <string name="app_name">Chalkboard</string>
-    <string name="app_version">0.0.9</string>
-    <string name="app_version_code">9</string>
+    <string name="app_version">0.1</string>
+    <string name="app_version_code">10</string>
 
     <string name="drawer_open">Open</string>
     <string name="drawer_close">Close</string>

@@ -33,8 +33,8 @@
 
             android:defaultValue="true"
             android:key="24_hour_time"
-            android:summary="Use 24 hour format instead of AM/PM format"
-            android:title="Use 24 hour format" />
+            android:summary="Use 24-hour format instead of AM/PM format"
+            android:title="Use 24-hour format" />
 
         <CheckBoxPreference
 
@@ -96,7 +96,7 @@
             android:key="first_lesson_time"
             android:maxLines="1"
             android:negativeButtonText=""
-            android:summary="Enter when your day starts in the format HH:mm"
+            android:summary="Enter when your day usually starts in the format HH:mm"
             android:title="First lesson time" />
 
         <EditTextPreference
@@ -105,7 +105,7 @@
             android:dialogTitle="Enter lesson length"
             android:key="default_lesson_length"
             android:numeric="integer"
-            android:summary="Choose how long a lesson is by default in minutes"
+            android:summary="Choose how long a lesson usually is in minutes"
             android:title="Default lesson length" />
 
     </PreferenceCategory>
