@@ -835,7 +835,7 @@ public class ChangeEvent extends AppCompatActivity {
 
             final MaterialDialog.Builder materialDialogBuilder = new MaterialDialog.Builder(this);
 
-            materialDialogBuilder.title("Delete event?");
+            materialDialogBuilder.title(editMode ? "Delete event?" : "Discard changes?");
             materialDialogBuilder.content("This event will be deleted.");
             materialDialogBuilder.positiveText("YES");
             materialDialogBuilder.positiveColorRes(R.color.black);
@@ -851,19 +851,23 @@ public class ChangeEvent extends AppCompatActivity {
 
                     pickedDateTime = null;
 
-                    DatabaseHelper databaseHelper = new DatabaseHelper(ChangeEvent.this);
+                    if (editMode) {
 
-                    try {
+                        DatabaseHelper databaseHelper = new DatabaseHelper(ChangeEvent.this);
 
-                        databaseHelper.deleteEvent(editEvent);
+                        try {
 
-                    } finally {
+                            databaseHelper.deleteEvent(editEvent);
 
-                        databaseHelper.close();
+                        } finally {
+
+                            databaseHelper.close();
+
+                        }
+
+                        EventBus.getDefault().post(new Update(false, true, false, false, false));
 
                     }
-
-                    EventBus.getDefault().post(new Update(false, true, false, false, false));
 
                     ChangeEvent.super.onBackPressed();
 
